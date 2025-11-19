@@ -1,3 +1,5 @@
-from .user import User
+# app/models/__init__.py
+from app.models.user import User
+from app.models.rfid_tag import RFIDTag
 
-_all_ = ["User"]
+__all__ = ["User", "RFIDTag"]

@@ -3,12 +3,20 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    env_file:
-      - .env   # <-- aqui o caminho relativo à pasta onde está o docker-compose.yml
     ports:
       - "8000:8000"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+    environment:
+      - DATABASE_HOST=db
+      - DATABASE_PORT=3306
+      - DATABASE_USER=Henrico
+      - DATABASE_PASSWORD=7bWRSFLouFD7LeqERQmfKyybWtqfRMLFCRSrB3ZY13hAVBfvYTYarFzOiGUbr1q3
+      - DATABASE_NAME=rfid_db
+      - SECRET_KEY=09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7
+      - ALGORITHM=HS256
+      - ACCESS_TOKEN_EXPIRE_MINUTES=30
 
   db:
     image: mysql:8.0
@@ -19,3 +27,15 @@ services:
       MYSQL_PASSWORD: 7bWRSFLouFD7LeqERQmfKyybWtqfRMLFCRSrB3ZY13hAVBfvYTYarFzOiGUbr1q3
     ports:
       - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      timeout: 30s
+      retries: 15
+      start_period: 60s
+      interval: 10s
+
+volumes:
+  mysql_data:
